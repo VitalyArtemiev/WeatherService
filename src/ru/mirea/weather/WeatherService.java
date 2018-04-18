@@ -1,6 +1,9 @@
-package ru.mirea;
+package ru.mirea.weather;
 
+import java.util.NoSuchElementException;
 import java.util.concurrent.ConcurrentLinkedQueue;
+
+import static java.lang.Thread.sleep;
 
 class WeatherTask {
     float time;
@@ -23,28 +26,34 @@ public class WeatherService {
     ConcurrentLinkedQueue<WeatherTask> input;
     ConcurrentLinkedQueue<WeatherResult> output;
 
-    public static Object sync;
-
+    boolean active;
     int taskID;
-    public synchronized void Notifyclient() {
-        notifyAll();
-        System.out.println("notifying");
-    }
 
     class ServiceThread implements Runnable {
-
         @Override
         public void run() {
-            while (true) {
-                if (!input.isEmpty()) {
-                    WeatherTask wt = input.remove();
-                    WeatherResult wr = new WeatherResult();
-                    //System.out.println("wtf");
-                    wr.ID = wt.ID;
-                    wr.weather = wt.city + " weather " + Integer.toString(wr.ID);
-                    output.add(wr);
-                    Notifyclient();
+            while (active) {
+                WeatherTask wt;
+                try {
+                    wt = input.remove();
                 }
+                catch (NoSuchElementException e) {
+                    continue;
+                }
+
+                WeatherResult wr = new WeatherResult();
+                wr.ID = wt.ID;
+                wr.weather = wt.city + " weather " + Integer.toString(wr.ID);
+
+                //pretending to fetch weather
+                try {
+                    sleep(100);
+                }
+                catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+
+                output.add(wr);
             }
         }
     }
@@ -53,8 +62,12 @@ public class WeatherService {
         input = new ConcurrentLinkedQueue<>();
         output = new ConcurrentLinkedQueue<>();
         //System.out.println("ws");
+        active = true;
         ServiceThread st = new ServiceThread();
-        (new Thread(st)).start();
+        new Thread(st).start();
+        new Thread(st).start();
+        new Thread(st).start();
+        new Thread(st).start();
     }
 
     public void AddTask(float t, String c) {
