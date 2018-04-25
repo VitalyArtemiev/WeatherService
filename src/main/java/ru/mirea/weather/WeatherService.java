@@ -1,7 +1,7 @@
 package ru.mirea.weather;
 
 import java.util.NoSuchElementException;
-import java.util.concurrent.ConcurrentLinkedQueue;
+//import java.util.concurrent.ThreadSafeQueue;
 
 import static java.lang.Thread.sleep;
 
@@ -23,8 +23,8 @@ class WeatherResult {
 }
 
 public class WeatherService {
-    ConcurrentLinkedQueue<WeatherTask> input;
-    ConcurrentLinkedQueue<WeatherResult> output;
+    ThreadSafeQueue<WeatherTask> input;
+    ThreadSafeQueue<WeatherResult> output;
 
     boolean active;
     int taskID;
@@ -59,8 +59,8 @@ public class WeatherService {
     }
 
     public WeatherService() {
-        input = new ConcurrentLinkedQueue<>();
-        output = new ConcurrentLinkedQueue<>();
+        input = new ThreadSafeQueue<>();
+        output = new ThreadSafeQueue<>();
         //System.out.println("ws");
         active = true;
         ServiceThread st = new ServiceThread();

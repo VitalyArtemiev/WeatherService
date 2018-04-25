@@ -22,7 +22,6 @@
         <outputDirectory></outputDirectory>
         <testOutputDirectory></testOutputDirectory-->
 
-
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -39,7 +38,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainclass>ru.mirea.weather.weatherservice</mainclass>
+                            <mainclass>ru.mirea.weather.WeatherService</mainclass>
                         </manifest>
                     </archive>
                 </configuration>
@@ -47,6 +46,4 @@
             </plugin>
         </plugins>
     </build>
-
-    
 </project>
