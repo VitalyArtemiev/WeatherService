@@ -2,14 +2,17 @@ package ru.mirea.weather;
 
 import static java.lang.Thread.sleep;
 import static org.junit.Assert.*;
-import static ru.mirea.weather.Main.ws;
 
 import org.junit.Test;
+
+import java.util.NoSuchElementException;
 
 public class TestWeatherService {
     @Test
     public void testWeather(){
         WeatherService ws = new WeatherService();
+
+        assertTrue("WS is running", ws.active);
 
         ws.AddTask(100, "Moscow");
 
@@ -58,35 +61,75 @@ public class TestWeatherService {
             b = true;
         }
 
-        assert(b);
+        assertTrue(b);
     }
-    @Test
-    public void testQueue() {
-        final ThreadSafeQueue<Integer> q = new ThreadSafeQueue<>();
-        q.add(5);
 
-        Runnable r = new Runnable() {
-            boolean active;
-            boolean start = false;
-            @Override
-            public void run() {
-                while (!start) {
+    class QTestThread implements Runnable {
 
-                }
+        boolean active;
+        ThreadSafeQueue q;
+        public int count;
 
-                while (active) {
+        public QTestThread(ThreadSafeQueue queue){
+            q = queue;
+            count = 0;
+        }
+
+        public void start() {
+            active = true;
+        }
+
+        @Override
+        public void run() {
+            while (!active) {
+
+            }
+
+            while (active) {
+                try {
                     q.remove();
+                    count++;
+                }
+                catch (NoSuchElementException e) {
+                    if (count < 10) {
+                        assertTrue("Missing task", false);
+                    }
                 }
             }
         }
+    }
+
+    @Test
+    public void testQueue() {
+        final ThreadSafeQueue<Integer> q = new ThreadSafeQueue<>();
+        q.add(1);
+        q.add(2);
+        q.add(3);
+        q.add(4);
+        q.add(5);
+        q.add(6);
+        q.add(7);
+        q.add(8);
+        q.add(9);
+        q.add(10);
+
+        QTestThread r = new QTestThread(q);
 
         new Thread(r).start();
         new Thread(r).start();
         new Thread(r).start();
         new Thread(r).start();
 
-         r.start = true;
+        r.start();
 
-        assertTrue("WS is running", ws.active);
+        try {
+            sleep(5000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        assertTrue("Error retrieving tasks", r.count == 10);
+
+        //
     }
 }
